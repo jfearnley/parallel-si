@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
+#include <sstream>
 #include <string.h>
 
 #include "game.h"
@@ -44,74 +45,64 @@ void Game::parse_pgsolver(string filename)
 		exit(1);
 	}
 
+    parse_pgsolver(in);
+}
 
-	char buffer[1024*32];
-	in.getline(buffer, 1024); // Discard "Parity" line
+void Game::parse_pgsolver(istream &in)
+{
+    string line;
 
-	while(in)
-	{
-		in.getline(buffer, 1024, '\n');
-		if(!in)
-			break;
+    // discard parity line
+    if (!getline(in, line)) return;
 
+    while (getline(in, line)) {
+        stringstream ss(line);
+        string token;
 
-        char* token = strtok(buffer, " ");
-		int id = atoi(token);
+        // ignore empty line
+        if (!(ss >> token)) continue;
 
-
-        token = strtok(NULL, " ");
-		int priority = atoi(token);
-        if(priority < 0)
-        {
-			cout << "Priorities must be non-negative!" << endl;
-			exit(1);
+        // parse id, priority, owner
+        int id = stoi(token);
+        if (id < 0) {
+            throw "invalid id";
         }
 
+        int priority;
+        if (!(ss >> priority)) {
+            throw "missing priority";
+        }
 
-        token = strtok(NULL, " ");
-		int player = atoi(token);
+        int player;
+        if (!(ss >> player)) {
+            throw "missing player";
+        }
 
+        if (player != 0 && player != 1) {
+            throw "invalid player";
+        }
 
         int assigned_id = add_vertex(player, priority);
-		if(id != assigned_id)
-		{
-			cout << "Vertices must be listed in order starting at 0!" << endl;
-			exit(1);
+		if(id != assigned_id) {
+            throw "vertices must be listed in order starting at 0!";
 		}
 
+        // parse successors and optional label
+        for (;;) {
+            int to;
+            if (!(ss >> to)) throw "missing successor";
 
-        // Get edges
-		char* edge = strtok(NULL, ""); // The rest of the buffer
-        
-        // Find the first ' ' or ';' or \0
-        char* current = edge;
-        while(true)
-        {
-            char c = *current;
-            if(c == '\"' or c == ';' or c == 0)
-            {
-                *current = 0;
-                break;
-            }
-            current++;
+            add_edge(id, to);
+
+            char ch;
+            if (!(ss >> ch)) throw "missing ; to end line";
+
+            if (ch != ',') break;
         }
 
-
-        token = strtok(edge, ",");
-		while(token != NULL)
-		{
-			int targetid = atoi(token);
-			add_edge(assigned_id, targetid);
-			token = strtok(NULL, ",");
-		}
-
-        if(edges[id].size() == 0)
-        {
-            cout << "Sinks are not allowed!" << endl;
-            exit(1);
+        if(edges[id].size() == 0) {
+            throw "sinks are not allowed!";
         }
-
-
     }
 }
 

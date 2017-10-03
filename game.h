@@ -30,6 +30,7 @@ public:
 
 
     void parse_pgsolver(std::string filename);
+    void parse_pgsolver(std::istream &in);
 };
 
 #endif
