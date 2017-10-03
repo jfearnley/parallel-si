@@ -8,9 +8,15 @@
 #include "cpu_vj.h"
 #include "cpu_bv.h"
 #include "valuation.h"
+#include <fstream>
 #include <iostream>
 #include <sys/time.h>
 #include <stdlib.h>
+
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 using namespace std;
 
@@ -130,10 +136,22 @@ int main(int argc, char** argv)
     }
 
     string algorithm = argv[1];
-    string game = argv[2];
+    string filename = argv[2];
 
     Game g;
-    g.parse_pgsolver(game);
+
+    try {
+        ifstream file(filename, ios_base::binary);
+        boost::iostreams::filtering_istream in;
+        if (boost::algorithm::ends_with(filename, ".bz2")) in.push(boost::iostreams::bzip2_decompressor());
+        if (boost::algorithm::ends_with(filename, ".gz")) in.push(boost::iostreams::gzip_decompressor());
+        in.push(file);
+        g.parse_pgsolver(in);
+        file.close();
+    } catch (const char *err) {
+        std::cerr << "parsing error: " << err << std::endl;
+        return -1;
+    }
 
     if(algorithm == "gpu")
     {

@@ -57,4 +57,4 @@ cuda_add_executable(
     si.h
     )
 
-target_link_libraries(parity pthread)
+target_link_libraries(parity pthread boost_iostreams)
