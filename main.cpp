@@ -94,7 +94,7 @@ template <typename T> double test(T& si, void (*f)(T&, int*, int*, bool), bool r
 
     double solve_time = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
 
-    cout << solve_time << " " << iter_count << " " << br_count << endl;
+    cout << std::fixed << solve_time << " " << iter_count << " " << br_count << endl;
 }
 
 // Checks that alg1 and alg2 give the same answer
