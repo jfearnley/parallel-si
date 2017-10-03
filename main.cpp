@@ -125,10 +125,10 @@ bool verify(StrategyImprovement& alg1, StrategyImprovement& alg2)
 
 int main(int argc, char** argv)
 {
-    if(argc != 3)
+    if(argc < 3)
     {
-        cout << "usage: " << argv[0] << " [algorithm] [game]" << endl << endl;
-        cout << "    algorithms: cpu, cpubf, cpu-reset, cpubv, cpubv" << endl << endl;
+        cout << "usage: " << argv[0] << " [algorithm] [game] [threads-for-cpulist]" << endl << endl;
+        cout << "    algorithms: cpu, cpubf, cpu-reset, cpubv, cpulist" << endl << endl;
         return 1;
     }
 
@@ -181,8 +181,14 @@ int main(int argc, char** argv)
     }
     else if(algorithm == "cpulist")
     {
-        CPUList<ArrayVal> cpu_list = CPUList<ArrayVal>(g, 8);
-        test<StrategyImprovement>(cpu_list, &solve_si, false);
+        int w = 8; // default: 8 threads
+        if (argc > 3) w = atoi(argv[3]);
+        if (w <= 0) {
+            cout << "invalid number of threads." << endl;
+        } else {
+            CPUList<ArrayVal> cpu_list = CPUList<ArrayVal>(g, w);
+            test<StrategyImprovement>(cpu_list, &solve_si, false);
+        }
 
 
     }
