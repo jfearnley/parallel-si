@@ -1,5 +1,4 @@
 #include "cpu_list_ranking.h"
-#include "gpu_list_ranking.h"
 #include "valuation.h"
 #include <thread>
 #include <vector>
